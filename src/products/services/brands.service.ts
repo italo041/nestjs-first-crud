@@ -13,7 +13,7 @@ export class BrandsService {
   }
 
   async findOne(id: number) {
-    const brand = await this.brandRepo.findOne({
+    const brand = await this.brandRepo.findOne(id, {
       relations: ['products'],
     });
     if (!brand) {
