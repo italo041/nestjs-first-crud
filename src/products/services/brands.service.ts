@@ -1,56 +1,39 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateBrandDto, UpdateBrandDto } from '../dtos/brands.dto';
 import { Brand } from '../entities/brand.entity';
 
 @Injectable()
 export class BrandsService {
-  private counterId = 1;
-  private brands: Brand[] = [
-    {
-      id: 1,
-      name: 'Brand 1',
-      image: 'image.jpg',
-    },
-  ];
-
-  create(payload: CreateBrandDto) {
-    this.counterId = this.counterId + 1;
-    const newBrand = {
-      id: this.counterId,
-      ...payload,
-    };
-    this.brands.push(newBrand);
-    return newBrand;
-  }
+  constructor(@InjectRepository(Brand) private brandRepo: Repository<Brand>) {}
 
   findAll() {
-    return this.brands;
+    return this.brandRepo.find();
   }
 
-  findOne(id: number) {
-    const brand = this.brands.find((item) => item.id === id);
+  async findOne(id: number) {
+    const brand = await this.brandRepo.findOne({
+      relations: ['products'],
+    });
     if (!brand) {
-      throw new NotFoundException(`Brand ${id} not found`);
+      throw new NotFoundException(`brand ${id} not found`);
     }
     return brand;
   }
 
-  update(id: number, payload: UpdateBrandDto) {
-    const brand = this.findOne(id);
-    if (brand) {
-      const index = this.brands.findIndex((item) => item.id === id);
-      this.brands[index] = { ...brand, ...payload };
-      return this.brands[index];
-    }
-    return null;
+  create(data: CreateBrandDto) {
+    const newBrand = this.brandRepo.create(data);
+    return this.brandRepo.save(newBrand);
+  }
+
+  async update(id: number, data: UpdateBrandDto) {
+    const brand = await this.brandRepo.findOne(id);
+    this.brandRepo.merge(brand, data);
+    return this.brandRepo.save(brand);
   }
 
   remove(id: number) {
-    const index = this.brands.findIndex((item) => item.id === id);
-    if (index === -1) {
-      throw new NotFoundException(`Brand #${id} not found`);
-    }
-    this.brands.splice(index, 1);
-    return true;
+    return this.brandRepo.delete(id);
   }
 }
