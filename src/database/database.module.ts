@@ -13,15 +13,15 @@ const API_KEY_PROD = 'PROD';
     TypeOrmModule.forRootAsync({
       inject: [config.KEY],
       useFactory: (configService: ConfigType<typeof config>) => {
-        const { user, dbName, host, password, port } = configService.mysql;
+        const { user, dbName, host, password, port } = configService.postgres;
         return {
-          type: 'mysql',
+          type: 'postgres',
           host,
           port,
           username: user,
           database: dbName,
           password,
-          synchronize: true,
+          synchronize: false,
           autoLoadEntities: true,
         };
       },

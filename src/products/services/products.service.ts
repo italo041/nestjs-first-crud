@@ -24,13 +24,6 @@ export class ProductsService {
   }
 
   async create(data: CreateProductDto) {
-    // const newProduct = new Product();
-    // newProduct.image = data.image;
-    // newProduct.name = data.name;
-    // newProduct.description = data.description;
-    // newProduct.price = data.price;
-    // newProduct.stock = data.stock;
-    // newProduct.image = data.image;
     const newProduct = await this.productRepo.create(data);
     return this.productRepo.save(newProduct);
   }
