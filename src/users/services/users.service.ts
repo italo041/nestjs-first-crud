@@ -4,6 +4,7 @@ import { CreateUserDto, UpdateUserDto } from '../dtos/users.dto';
 import { User } from '../entities/user.entity';
 import { Order } from '../entities/order.entity';
 import { Client } from 'pg';
+import * as bcrypt from 'bcrypt';
 
 import { ProductsService } from './../../products/services/products.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -34,8 +35,14 @@ export class UsersService {
     return user;
   }
 
+  findByEmail(email: string) {
+    return this.userRepo.findOne({ where: { email } });
+  }
+
   async create(data: CreateUserDto) {
     const newUser = this.userRepo.create(data);
+    const hashPassword = await bcrypt.hash(newUser.password, 10);
+    newUser.password = hashPassword;
     if (data.customerId) {
       const customer = await this.customersService.findOne(data.customerId);
       newUser.customer = customer;
