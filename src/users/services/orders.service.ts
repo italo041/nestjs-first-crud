@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 import { CreateOrderDto, UpdateOrderDto } from '../dtos/order.dto';
 import { Customer } from '../entities/customer.entity';
 import { Order } from '../entities/order.entity';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order) private orderRepo: Repository<Order>,
     @InjectRepository(Customer) private customerRepo: Repository<Customer>,
+    @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
   findAll() {
@@ -46,5 +48,22 @@ export class OrdersService {
 
   remove(id: number) {
     return this.orderRepo.delete(id);
+  }
+
+  async ordersByUser(userId: number) {
+    const customerId = (
+      await this.userRepo.findOne(userId, {
+        relations: ['customer'],
+      })
+    ).customer.id;
+
+    return this.orderRepo.find({
+      relations: ['customer'],
+      where: {
+        customer: {
+          id: customerId,
+        },
+      },
+    });
   }
 }
