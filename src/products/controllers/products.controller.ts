@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   Query,
+  UseGuards,
   // ParseIntPipe,
 } from '@nestjs/common';
 
@@ -18,7 +19,9 @@ import {
   UpdateProductDto,
 } from '../dtos/products.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
